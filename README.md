@@ -57,6 +57,43 @@ docker compose down -v
 
 ---
 
+## Local Development
+
+### Install Dependencies
+
+```bash
+npm ci
+```
+
+### Build Project
+
+```bash
+npm run build
+```
+
+### Start WriterServer
+
+```bash
+npm run start:writer-server
+```
+
+### Start LogServer
+
+```bash
+npm run start:log-server
+```
+
+The WriterServer must be started before any LogServer instance.
+
+By default:
+
+```text
+WriterServer: ws://localhost:8090
+LogServer: ws://localhost:8080
+```
+
+---
+
 ## Architecture
 
 ```text
@@ -144,7 +181,6 @@ type LogLevel =
 ```
 
 #### Notes
-
 
 External clients must not provide the `receivedTimestamp` field. It is generated automatically by WriterServer.
 
