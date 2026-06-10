@@ -59,6 +59,13 @@ docker compose down -v
 
 ## Local Development
 
+### Prerequisites
+
+The following software must be installed:
+
+- Node.js
+- npm
+
 ### Install Dependencies
 
 ```bash
