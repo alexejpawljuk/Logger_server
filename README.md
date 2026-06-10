@@ -98,13 +98,15 @@ ws://localhost:8080
 
 ---
 
-## Request Models
+## Public JSON-RPC API
+
+The following methods are exposed by LogServer and are available to external clients through the public WebSocket endpoint.
 
 ### logMessage Method
 
 Creates a new log entry in the distributed logging system.
 
-The request is validated by LogServer. If validation succeeds, the server adds a `receivedTimestamp` and forwards the log to WriterServer for persistence.
+The request is validated by LogServer and then forwarded to WriterServer. WriterServer validates the write request, generates a `receivedTimestamp`, and delegates persistence to LogStorage.
 
 #### Method
 
@@ -143,7 +145,8 @@ type LogLevel =
 
 #### Notes
 
-External clients must not provide the `receivedTimestamp` field. It is generated automatically by LogServer.
+
+External clients must not provide the `receivedTimestamp` field. It is generated automatically by WriterServer.
 
 #### Example Responses
 
@@ -288,7 +291,7 @@ type LogSearchQuery = {
         {
             "eventTimestamp": 1710000000000,
             "receivedTimestamp": 1710000001000,
-            "message": "database",
+            "message": "Database connection failed",
             "level": "error"
         }
     ]
@@ -344,7 +347,6 @@ Responsibilities:
 
 * receive external JSON-RPC requests
 * validate incoming request parameters
-* generate `receivedTimestamp` for accepted log entries
 * delegate storage operations to WriterServer through WriterClient
 * return unified application responses to clients
 
@@ -398,6 +400,8 @@ It centralizes all storage-related operations and ensures that log files are acc
 Responsibilities:
 
 * receive internal requests from WriterClient
+* generate `receivedTimestamp` for accepted log entries
+* validate incoming request parameters
 * delegate persistence operations to LogStorage
 * return unified application responses
 * provide a single access point to log storage
@@ -543,8 +547,8 @@ The following scenarios were verified:
 * log search
 * log validation
 * log rotation
-* logServer failure
+* LogServer failure
 * multiple LogServer failures
-* writerServer failure
-* docker volume persistence
-* nginx load balancing
+* WriterServer failure
+* Docker volume persistence
+* Nginx load balancing
