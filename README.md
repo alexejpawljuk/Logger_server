@@ -250,7 +250,12 @@ type LogSearchQuery = {
     message?: string;
     from?: number;
     to?: number;
+    timestampField?: LogTimestampField;
 };
+
+type LogTimestampField =
+    | "eventTimestamp"
+    | "receivedTimestamp";
 ```
 
 #### Parameter Description
@@ -259,9 +264,9 @@ type LogSearchQuery = {
 | --------- | ------------------------------------------------------------------------- |
 | `level`   | Returns only logs with the specified log level                            |
 | `message` | Case-insensitive substring search within the log message                  |
-| `from`    | Returns logs with `receivedTimestamp` greater than or equal to this value |
-| `to`      | Returns logs with `receivedTimestamp` less than or equal to this value    |
-
+| `from` | Returns logs with the selected timestamp field greater than or equal to this value |
+| `to` | Returns logs with the selected timestamp field less than or equal to this value |
+| `timestampField` | Timestamp field used for time filtering (`eventTimestamp` or `receivedTimestamp`) |
 #### Example Request
 
 ```json
@@ -269,7 +274,8 @@ type LogSearchQuery = {
     "level": "error",
     "message": "database",
     "from": 1710000000000,
-    "to": 1710009999999
+    "to": 1710009999999,
+    "timestampField": "eventTimestamp"
 }
 ```
 
@@ -279,6 +285,8 @@ type LogSearchQuery = {
 * If multiple filters are specified, they are combined using logical **AND**.
 * The search is performed against logs from both active and archived log files.
 * Message matching is case-insensitive.
+* By default, time filtering is performed using `receivedTimestamp`.
+* To filter by client event time, set `timestampField` to `eventTimestamp`.
 
 #### Example Responses
 
