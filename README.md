@@ -463,6 +463,8 @@ Its sole responsibility is managing log persistence and retrieval.
 
 `LogStorage` reads data from both active and archived log files, ensuring that log retrieval and search operations operate on the complete log history.
 
+Invalid or corrupted log records are skipped during parsing and do not interrupt log retrieval or search operations.
+
 #### Log File Format
 
 Logs are stored as newline-delimited JSON (NDJSON).
