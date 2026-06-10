@@ -12,7 +12,6 @@ import {AppResponse} from "../types/responses";
  * Validates incoming requests and delegates
  * storage operations to WriterServer.
  */
-
 export class LogServer implements ILogServer {
 
     constructor(

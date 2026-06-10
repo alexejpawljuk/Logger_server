@@ -13,13 +13,13 @@ import {IValidator} from "../types/validator";
  * All LogServer instances delegate persistence operations
  * to WriterServer to prevent concurrent writes to log files.
  */
-
 export class WriterServer implements IWriterServer {
 
     constructor(
         private readonly writerServer: WSServer,
         private readonly logStorage: ILogStorage,
         private readonly logMessageValidator: IValidator<ILog>,
+        private readonly logSearchValidator: IValidator<LogSearchQuery>,
     ) {
     }
 
@@ -79,8 +79,17 @@ export class WriterServer implements IWriterServer {
         })
 
         this.writerServer.register(METHOD_NAME.SEARCH_STORED_LOGS, async (params): Promise<AppResponse<ILog[]>> => {
+            const validationResult = this.logSearchValidator.validate(params);
+
+            if (!validationResult.isValid) {
+                return {
+                    success: false,
+                    error: validationResult.error,
+                };
+            }
+
             try {
-                const logs = await this.logStorage.searchLogs(params as LogSearchQuery)
+                const logs = await this.logStorage.searchLogs(validationResult.data)
 
                 return {
                     success: true,
