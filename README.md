@@ -449,7 +449,7 @@ Responsibilities:
 * delegate persistence operations to LogStorage
 * return unified application responses
 * provide a single access point to log storage
-* guarantee serialized write operations
+* ensure that write operations are handled by a single writer process
 
 Available methods:
 
