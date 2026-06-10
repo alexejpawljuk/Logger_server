@@ -3,6 +3,7 @@ import {WriterServer} from "./Writer-server";
 import winston from "winston";
 import {LogStorage} from "../log-storage/Log-storage";
 import {env} from "../config/env";
+import {LogMessageValidator} from "../util/Log-message-validator";
 
 const logger = winston.createLogger({
     level: "silly",
@@ -20,8 +21,9 @@ const wsServer = new Server({
     port: env.WRITER_SERVER_PORT,
     host: env.WRITER_SERVER_HOST,
 })
+const logMessageValidator = new LogMessageValidator()
 const logStorage = new LogStorage(logger, env.LOG_FILE_PATH);
-const writerServer = new WriterServer(wsServer, logStorage)
+const writerServer = new WriterServer(wsServer, logStorage, logMessageValidator)
 
 writerServer
     .start()

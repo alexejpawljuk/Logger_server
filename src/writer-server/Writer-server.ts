@@ -5,6 +5,7 @@ import {AppResponse} from "../types/responses";
 import {ILog, LogSearchQuery} from "../types/log";
 import {ILogStorage} from "../types/log-storage";
 import {ERROR_CODE} from "../constants/error-codes";
+import {IValidator} from "../types/validator";
 
 /**
  * Centralized storage coordinator.
@@ -18,6 +19,7 @@ export class WriterServer implements IWriterServer {
     constructor(
         private readonly writerServer: WSServer,
         private readonly logStorage: ILogStorage,
+        private readonly logMessageValidator: IValidator<ILog>,
     ) {
     }
 
@@ -33,11 +35,25 @@ export class WriterServer implements IWriterServer {
 
     private registerMethods(): void {
         this.writerServer.register(METHOD_NAME.WRITE_LOG, (params): AppResponse<ILog> => {
-            this.logStorage.writeLog(params as ILog)
+            const validationResult = this.logMessageValidator.validate(params)
+
+            if (!validationResult.isValid) {
+                return {
+                    success: false,
+                    error: validationResult.error,
+                }
+            }
+
+            const log: ILog = {
+                ...validationResult.data,
+                receivedTimestamp: Date.now(),
+            }
+
+            this.logStorage.writeLog(log)
 
             return {
                 success: true,
-                data: params as ILog,
+                data: log,
             }
         })
 

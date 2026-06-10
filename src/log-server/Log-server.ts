@@ -45,12 +45,7 @@ export class LogServer implements ILogServer {
                 }
             }
 
-            const log: ILog = {
-                ...validationResult.data,
-                receivedTimestamp: Date.now(),
-            }
-
-            const writeResult = await this.writerClient.writeLog(log)
+            const writeResult = await this.writerClient.writeLog(validationResult.data)
 
             if (!writeResult.success) {
                 return writeResult;
