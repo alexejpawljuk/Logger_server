@@ -13,6 +13,13 @@ services:
       LOG_MAX_SIZE: 1048576
     volumes:
       - logs-data:/app/logs
+    healthcheck:
+      test: [ "CMD", "node", "-e", "const net = require('net'); const socket = net.connect(8090, '127.0.0.1', () => process.exit(0)); socket.on('error', () => process.exit(1));" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
 
   log-server-1:
     image: distributed-logger:latest
@@ -23,7 +30,8 @@ services:
       LOG_SERVER_HOST: 0.0.0.0
       WRITER_SERVER_URL: ws://writer-server:8090
     depends_on:
-      - writer-server
+      writer-server:
+        condition: service_healthy
 
   log-server-2:
     image: distributed-logger:latest
@@ -34,7 +42,8 @@ services:
       LOG_SERVER_HOST: 0.0.0.0
       WRITER_SERVER_URL: ws://writer-server:8090
     depends_on:
-      - writer-server
+      writer-server:
+        condition: service_healthy
 
   log-server-3:
     image: distributed-logger:latest
@@ -45,7 +54,8 @@ services:
       LOG_SERVER_HOST: 0.0.0.0
       WRITER_SERVER_URL: ws://writer-server:8090
     depends_on:
-      - writer-server
+      writer-server:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
