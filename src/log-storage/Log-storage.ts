@@ -3,6 +3,7 @@ import {promises as fs} from "fs";
 import path from "path";
 import {ILogStorage} from "../types/log-storage";
 import {ILog, LogSearchQuery} from "../types/log";
+import {TIMESTAMP_FIELD} from "../constants/timestamp-fields";
 
 /**
  * Storage layer responsible for log persistence,
@@ -49,7 +50,7 @@ export class LogStorage implements ILogStorage {
                 );
             }
 
-            // Return logs in chronological order (oldest first
+            // Return logs in chronological order (oldest first)
             return logs.sort((a, b) =>
                 (a.receivedTimestamp ?? 0) -
                 (b.receivedTimestamp ?? 0),
@@ -65,27 +66,67 @@ export class LogStorage implements ILogStorage {
         }
     }
 
+
     async searchLogs(query: LogSearchQuery): Promise<ILog[]> {
         const logs = await this.readLogs();
+
+        const timestampField =
+            query.timestampField ?? TIMESTAMP_FIELD.RECEIVED;
 
         return logs.filter((log) => {
             if (query.level && log.level !== query.level) {
                 return false;
             }
 
-            if (query.message && !log.message.toLowerCase().includes(query.message.toLowerCase())) {
+            if (
+                query.message &&
+                !log.message.toLowerCase().includes(query.message.toLowerCase())
+            ) {
                 return false;
             }
 
-            if (query.from !== undefined && (log.receivedTimestamp ?? 0) < query.from) {
+            const timestamp = log[timestampField];
+
+            if (
+                (query.from !== undefined || query.to !== undefined) &&
+                timestamp === undefined
+            ) {
                 return false;
             }
 
-            if (query.to !== undefined && (log.receivedTimestamp ?? 0) > query.to) {
+            if (query.from !== undefined && timestamp! < query.from) {
+                return false;
+            }
+
+            if (query.to !== undefined && timestamp! > query.to) {
                 return false;
             }
 
             return true;
         });
     }
+
+    // async searchLogs(query: LogSearchQuery): Promise<ILog[]> {
+    //     const logs = await this.readLogs();
+    //
+    //     return logs.filter((log) => {
+    //         if (query.level && log.level !== query.level) {
+    //             return false;
+    //         }
+    //
+    //         if (query.message && !log.message.toLowerCase().includes(query.message.toLowerCase())) {
+    //             return false;
+    //         }
+    //
+    //         if (query.from !== undefined && (log.receivedTimestamp ?? 0) < query.from) {
+    //             return false;
+    //         }
+    //
+    //         if (query.to !== undefined && (log.receivedTimestamp ?? 0) > query.to) {
+    //             return false;
+    //         }
+    //
+    //         return true;
+    //     });
+    // }
 }

@@ -1,7 +1,8 @@
-import {LOG_LEVEL} from "../constants/log-level";
-import {IValidator, ValidationResult} from "../types/validator";
-import {LogLevel, LogSearchQuery} from "../types/log";
-import {ERROR_CODE} from "../constants/error-codes";
+import { LOG_LEVEL } from "../constants/log-level";
+import { TIMESTAMP_FIELD } from "../constants/timestamp-fields";
+import { IValidator, ValidationResult } from "../types/validator";
+import { LogLevel, LogSearchQuery, LogTimestampField } from "../types/log";
+import { ERROR_CODE } from "../constants/error-codes";
 
 export class LogSearchValidator implements IValidator<LogSearchQuery> {
     validate(params: unknown): ValidationResult<LogSearchQuery> {
@@ -94,6 +95,22 @@ export class LogSearchValidator implements IValidator<LogSearchQuery> {
             };
         }
 
+        if (
+            input.timestampField !== undefined &&
+            (
+                typeof input.timestampField !== "string" ||
+                !Object.values(TIMESTAMP_FIELD).includes(input.timestampField as LogTimestampField)
+            )
+        ) {
+            return {
+                isValid: false,
+                error: {
+                    code: ERROR_CODE.INVALID_SEARCH_TIMESTAMP_FIELD,
+                    message: "Field 'timestampField' contains unsupported timestamp field",
+                },
+            };
+        }
+
         const query: LogSearchQuery = {};
 
         if (input.level !== undefined) {
@@ -112,9 +129,13 @@ export class LogSearchValidator implements IValidator<LogSearchQuery> {
             query.to = input.to;
         }
 
+        if (input.timestampField !== undefined) {
+            query.timestampField = input.timestampField;
+        }
+
         return {
             isValid: true,
-            data: query
+            data: query,
         };
     }
 }
