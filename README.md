@@ -63,7 +63,7 @@ docker compose down -v
 
 The following software must be installed:
 
-- Node.js
+- Node.js 20.x
 - npm
 
 ### Install Dependencies

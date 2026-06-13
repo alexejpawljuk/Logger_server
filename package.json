@@ -5,6 +5,9 @@
   "license": "ISC",
   "author": "Pawljuk Alexej",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
   "main": "index.js",
   "scripts": {
     "build": "tsc",
